@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-header">Your Groups</div>
+            <div class="card-body">
+                {% if user.groups %}
+                    <ul class="list-group">
+                        {% for group in user.groups %}
+                            <li class="list-group-item">
+                                <a href="{{ url_for('groups.group_details', group_id=group.id) }}">
+                                    {{ group.name }}
+                                </a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p>You haven't joined any groups yet.</p>
+                {% endif %}
+                <a href="{{ url_for('groups.create_group') }}" class="btn btn-primary mt-3">Create Group</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-header">Recent Expenses</div>
+            <div class="card-body">
+                {% if user.expenses.all() %}
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Description</th>
+                                <th>Amount</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for expense in user.expenses.order_by(Expense.date.desc()).limit(5) %}
+                                <tr>
+                                    <td>{{ expense.description }}</td>
+                                    <td>${{ expense.amount|round(2) }}</td>
+                                    <td>{{ expense.date.strftime('%Y-%m-%d') }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <p>No expenses yet.</p>
+                {% endif %}
+                <a href="{{ url_for('expenses.add_expense') }}" class="btn btn-primary">Add Expense</a>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">Unsettled Debts</div>
+            <div class="card-body">
+                {% set debts = user.debts.filter_by(is_settled=False).all() %}
+                {% if debts %}
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Expense</th>
+                                <th>Amount</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for debt in debts %}
+                                <tr>
+                                    <td>{{ debt.expense.description }}</td>
+                                    <td>${{ debt.amount|round(2) }}</td>
+                                    <td>
+                                        <a href="#" class="btn btn-sm btn-success">Settle</a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <p>No outstanding debts.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

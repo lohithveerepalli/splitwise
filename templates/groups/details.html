@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <h2>{{ group.name }}</h2>
+        <p>{{ group.description }}</p>
+        
+        <div class="card mt-3">
+            <div class="card-header">Group Expenses</div>
+            <div class="card-body">
+                {% if group.expenses.all() %}
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Description</th>
+                                <th>Amount</th>
+                                <th>Paid By</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for expense in group.expenses.order_by(Expense.date.desc()) %}
+                                <tr>
+                                    <td>{{ expense.description }}</td>
+                                    <td>${{ expense.amount|round(2) }}</td>
+                                    <td>{{ expense.payer.username }}</td>
+                                    <td>{{ expense.date.strftime('%Y-%m-%d') }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <p>No expenses in this group yet.</p>
+                {% endif %}
+                <a href="{{ url_for('expenses.add_expense') }}" class="btn btn-primary">Add Expense</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">Group Members</div>
+            <div class="card-body">
+                <ul class="list-group">
+                    {% for member in group.members %}
+                        <li class="list-group-item">{{ member.username }}</li>
+                    {% endfor %}
+                </ul>
+                <a href="{{ url_for('groups.add_member', group_id=group.id) }}" class="btn btn-secondary mt-3">Add Member</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
